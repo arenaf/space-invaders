@@ -22,8 +22,14 @@ user_ship = ship.create_ship()
 
 shots = []
 run = True
-bullet = Bullet(300, 300)
+bullets = []
 clock = pygame.time.Clock()
+bullet = Bullet(300, 300)
+
+def shot_bullet():
+    bullet = Bullet(300, 300)
+    pygame.draw.rect(screen, ship_bg, bullet)
+    bullet.move_bullet()
 
 while run:
     clock.tick(fps)
@@ -35,7 +41,6 @@ while run:
 
     # Dibuja la nave
     pygame.draw.rect(screen, ship_bg, user_ship)
-
     # Manejo de teclas
     key = pygame.key.get_pressed()
     if key[pygame.K_RIGHT]:
@@ -43,15 +48,13 @@ while run:
     if key[pygame.K_LEFT]:
         ship.move_left(user_ship)
     if key[pygame.K_UP]:
-        bullet = Bullet(user_ship.x, user_ship.y-20)
-        pygame.draw.rect(screen, ship_bg, bullet)
-        # bullet.update()
-        # bullet = Bullet(user_ship.rect.centerx, user_ship.rect.centery)
-        # pygame.draw.rect(screen, ship_bg, ship.attack(user_ship))
-    # bullet = Bullet(user_ship.x, user_ship.y - 20)
-    pygame.draw.rect(screen, ship_bg, bullet)
-    bullet.move()
-    # time.tick(30)
+        b = Bullet(user_ship.x + 2, user_ship.y - 20)
+        bullets.append(b)
+
+    for b in bullets:
+        pygame.draw.rect(screen, ship_bg, b)
+        b.move_bullet()
+
     # Actualiza el lienzo para mostrar los cambios
     pygame.display.update()
 

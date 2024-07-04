@@ -1,9 +1,8 @@
 import pygame
 
 
-class Ship(pygame.sprite.Sprite):
+class Ship:
     def __init__(self, x, y):
-        super().__init__()
         self.ship_width = 40
         self.ship_height = 20
         self.shot_width = 5
