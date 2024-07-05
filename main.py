@@ -28,7 +28,8 @@ last_shot = 0
 run = True
 bullets = []
 clock = pygame.time.Clock()
-# bullet = Bullet(300, 300)
+y = 60
+x = 100
 
 # Imágenes
 img_ship = pygame.image.load("assets/img/ship.png")
@@ -37,10 +38,17 @@ img_octopus = pygame.image.load("assets/img/octopus.png")
 img_squid = pygame.image.load("assets/img/squid.png")
 
 
+# Crea los objetos
 ship = Ship(screen_width//2, screen_height, img_ship, screen)
-crab = Alien(200, 50, img_crab, screen)
-octopus = Alien(200, 150, img_octopus, screen)
-squid = Alien(200, 250, img_squid, screen)
+
+crab = Alien(x, y, img_crab, screen)
+pos_crabs = crab.create_aliens(1, 11)
+
+octopus = Alien(x, y+60, img_octopus, screen)
+pos_octopus = octopus.create_aliens(2, 11)
+
+squid = Alien(x, y+180, img_squid, screen)
+pos_squid = squid.create_aliens(2, 11)
 
 
 while run:
@@ -55,9 +63,17 @@ while run:
     ship.create_ship()
 
     # Dibuja los aliens
-    crab.draw_alien()
-    octopus.draw_alien()
-    squid.draw_alien()
+    for i in pos_crabs:
+        crab = Alien(i[0], i[1], img_crab, screen)
+        crab.draw_alien()
+
+    for i in pos_octopus:
+        octopus = Alien(i[0], i[1], img_octopus, screen)
+        octopus.draw_alien()
+
+    for i in pos_squid:
+        squid = Alien(i[0], i[1], img_squid, screen)
+        squid.draw_alien()
 
     # Manejo de teclas
     key = pygame.key.get_pressed()
