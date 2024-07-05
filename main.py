@@ -20,16 +20,14 @@ screen = pygame.display.set_mode((screen_width, screen_height))
 ship = Ship(screen_width//2, screen_height)
 user_ship = ship.create_ship()
 
-shots = []
+# Variables
+shot = False # Controla si el arma está disparada
+gun_cooldown = 500
+last_shot = 0
 run = True
 bullets = []
 clock = pygame.time.Clock()
 bullet = Bullet(300, 300)
-
-def shot_bullet():
-    bullet = Bullet(300, 300)
-    pygame.draw.rect(screen, ship_bg, bullet)
-    bullet.move_bullet()
 
 while run:
     clock.tick(fps)
@@ -47,10 +45,15 @@ while run:
         ship.move_right(user_ship)
     if key[pygame.K_LEFT]:
         ship.move_left(user_ship)
-    if key[pygame.K_UP]:
-        b = Bullet(user_ship.x + 2, user_ship.y - 20)
+    if key[pygame.K_SPACE] and shot == False and (pygame.time.get_ticks() - last_shot > gun_cooldown):
+        b = Bullet(user_ship.x + user_ship.width//2, user_ship.y)
+        shot = True
+        last_shot = pygame.time.get_ticks()
         bullets.append(b)
+    if key[pygame.K_SPACE] == False: # Si no está presionada la barra espaciadora, puede lanzar otro disparo
+        shot = False
 
+    # Disparos de la nave
     for b in bullets:
         pygame.draw.rect(screen, ship_bg, b)
         b.move_bullet()
