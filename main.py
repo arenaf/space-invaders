@@ -44,12 +44,33 @@ ship = Ship(screen_width//2, screen_height, img_ship, screen)
 crab = Alien(x, y, img_crab, screen)
 pos_crabs = crab.create_aliens(1, 11)
 
-octopus = Alien(x, y+60, img_octopus, screen)
+octopus = Alien(x, y+50, img_octopus, screen)
 pos_octopus = octopus.create_aliens(2, 11)
 
-squid = Alien(x, y+180, img_squid, screen)
+squid = Alien(x, y+150, img_squid, screen)
 pos_squid = squid.create_aliens(2, 11)
+# all_aliens = []
+all_aliens = pygame.sprite.Group()
+# Dibuja los aliens
+all_crabs = []
+for i in pos_crabs:
+    crab = Alien(i[0], i[1], img_crab, screen)
+    all_crabs.append(crab)
+    all_aliens.add(crab)
 
+all_octopus = []
+for i in pos_octopus:
+    octopus = Alien(i[0], i[1], img_octopus, screen)
+    all_octopus.append(octopus)
+    all_aliens.add(octopus)
+
+all_squid = []
+for i in pos_squid:
+    squid = Alien(i[0], i[1], img_squid, screen)
+    all_squid.append(squid)
+    all_aliens.add(squid)
+
+direction_right = True
 
 while run:
     clock.tick(fps)
@@ -62,18 +83,38 @@ while run:
     # Dibuja la nave
     ship.create_ship()
 
-    # Dibuja los aliens
-    for i in pos_crabs:
-        crab = Alien(i[0], i[1], img_crab, screen)
-        crab.draw_alien()
 
-    for i in pos_octopus:
-        octopus = Alien(i[0], i[1], img_octopus, screen)
-        octopus.draw_alien()
+    # Mueve los aliens
+    all_aliens.draw(screen)
+    all_aliens.update()
 
-    for i in pos_squid:
-        squid = Alien(i[0], i[1], img_squid, screen)
-        squid.draw_alien()
+    # for alien in all_aliens:
+    #     alien.draw_alien()
+        # alien.move_alien()
+        # alien.move(direction_right)
+    # for alien in all_aliens:
+    #     print("x ", alien.x)
+    #     if alien.x < 590:
+    #         alien.move_right()
+    #     if alien.x > 590:
+    #         alien.move_left()
+    #     if alien.x == 0:
+    #         alien.move_right()
+
+
+    # for a_crab in all_crabs:
+    #     a_crab.draw_alien()
+    #     a_crab.move_alien()
+    #
+    # for an_octopus in all_octopus:
+    #     an_octopus.draw_alien()
+    #     an_octopus.move_alien()
+    #
+    # for a_squid in all_squid:
+    #     a_squid.draw_alien()
+    #     a_squid.move_alien()
+
+
 
     # Manejo de teclas
     key = pygame.key.get_pressed()
@@ -98,5 +139,6 @@ while run:
 
     # Actualiza el lienzo para mostrar los cambios
     pygame.display.update()
+    # pygame.display.flip()
 
 pygame.quit()
