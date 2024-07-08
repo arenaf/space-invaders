@@ -31,8 +31,8 @@ last_shot = 0
 shot_alien = False
 last_shot_alien = 0
 run = True
-bullets = []
-alien_bullets_list = []
+bullets = pygame.sprite.Group()
+alien_bullets_list = pygame.sprite.Group()
 clock = pygame.time.Clock()
 y = 100
 x = 100
@@ -46,7 +46,16 @@ img_squid = pygame.image.load("assets/img/squid.png")
 
 
 # Crea los objetos
+
 ship = Ship(screen_width//2, screen_height, img_ship, screen)
+ship2 = Ship(30, 75, img_ship, screen)
+ship3 = Ship(80, 75, img_ship, screen)
+
+ship_list = []
+ship_list.append(ship)
+ship_list.append(ship2)
+ship_list.append(ship3)
+
 
 crab = Alien(x, y, img_crab, screen)
 pos_crabs = crab.create_aliens(1, 11)
@@ -84,12 +93,16 @@ while run:
     clock.tick(fps)
     screen.fill((0, 0, 0))  # Refresca la ventana y pinta de negro
 
+    pygame.draw.line(screen, (199, 128, 250), (0, 50), (screen_width, 50))
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
 
-    # Dibuja la nave
+    # Dibuja las naves
     ship.create_ship()
+    ship2.create_ship()
+    ship3.create_ship()
 
     # Dibuja los aliens
     all_aliens.draw(screen)
@@ -105,7 +118,7 @@ while run:
         b_allien = Bullet(bullet_alien.rect.x, bullet_alien.rect.y)
         shot_alien = True
         last_shot_alien = pygame.time.get_ticks()
-        alien_bullets_list.append(b_allien)
+        alien_bullets_list.add(b_allien)
 
     if len(alien_bullets_list) < 2:
         shot_alien = False
@@ -113,7 +126,7 @@ while run:
         pygame.draw.rect(screen, bullet_alien_bg, ba)
         ba.move_bullet_alien()
         if ba.rect.y > screen_height:
-            alien_bullets_list.remove(ba)
+            ba.kill()
 
 
     # Manejo de teclas
@@ -128,25 +141,25 @@ while run:
         b = Bullet(ship.rect.x + ship.rect.width // 2, ship.rect.y)
         shot = True
         last_shot = pygame.time.get_ticks()
-        bullets.append(b)
+        bullets.add(b)
     if key[pygame.K_SPACE] == False: # Si no está presionada la barra espaciadora, puede lanzar otro disparo
         shot = False
     for b in bullets:
         pygame.draw.rect(screen, bullet_bg, b)
         b.move_bullet()
         if b.rect.y < 0:
-            bullets.remove(b)
+            b.kill()
+            # bullets.remove(b)
 
     # Colisión
     if pygame.sprite.spritecollide(ship, alien_bullets_list, dokill=False):
         print("Colisión contra nave")
 
-    for alien in all_aliens:
-        if pygame.sprite.spritecollide(alien, bullets, dokill=False):
-            all_aliens.remove(alien)
-            print("Colisión contra alien")
 
-
+    for bullet in bullets:
+        collision_alien = pygame.sprite.spritecollide(bullet, all_aliens, True)
+        if collision_alien != []:
+            bullet.kill()
 
 
     # Actualiza el lienzo para mostrar los cambios

@@ -12,9 +12,6 @@ class Alien(pygame.sprite.Sprite):
         self.screen = screen
         self.speed = 1
 
-    # def draw_alien(self):
-    #     self.screen.blit(self.image, self.rect)
-
     def create_aliens(self, row, col):
         all_aliens = []
         new_y = self.y

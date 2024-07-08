@@ -1,8 +1,9 @@
 import pygame
 
 
-class Bullet:
+class Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y):
+        super().__init__()
         self.coord_x = x
         self.coord_y = y
         self.shot_width = 3
