@@ -26,26 +26,29 @@ class Alien(pygame.sprite.Sprite):
             new_y += 50
         return all_aliens
 
-    def move_alien(self):
-        if self.rect.x < 760:
-            self.rect.x += self.speed
+    # def move_alien(self):
+    #     if self.rect.x < 760:
+    #         self.rect.x += self.speed
+    #
+    # def move(self, movement):
+    #     if movement:
+    #         self.rect.x += self.speed
+    #         # print("True ",  movement)
+    #     if movement == False:
+    #         self.rect.x -= self.speed
+    #         # print("False ", movement)
+    #
+    # def move_right(self):
+    #     print(self.rect.x)
+    #     self.rect.x += self.speed
+    #
+    # def move_left(self):
+    #     self.rect.x -= self.speed
 
-    def move(self, movement):
-        if movement:
-            self.rect.x += self.speed
-            # print("True ",  movement)
-        if movement == False:
-            self.rect.x -= self.speed
-            # print("False ", movement)
-
-    def move_right(self):
-        print(self.rect.x)
+    def update(self, aliens):
+        for alien in aliens:
+            if alien.rect.x > 760:
+                self.speed *= -1
+            if alien.rect.x < 0:
+                self.speed *= -1
         self.rect.x += self.speed
-
-    def move_left(self):
-        self.rect.x -= self.speed
-
-    def update(self):
-        self.rect.x += self.speed
-        if self.rect.right > 700:
-            self.rect.left = 0
