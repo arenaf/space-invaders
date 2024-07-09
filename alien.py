@@ -2,7 +2,7 @@ import pygame
 
 
 class Alien(pygame.sprite.Sprite):
-    def __init__(self, x, y, image):
+    def __init__(self, x, y, image, speed):
         super().__init__()
         self.image = image
         self.rect = self.image.get_rect()
@@ -10,7 +10,7 @@ class Alien(pygame.sprite.Sprite):
         self.y = y
         self.rect.center = (self.x, self.y)
         # self.screen = screen
-        self.speed = 1
+        self.speed = speed
 
     def update(self, aliens):
         for alien in aliens:
@@ -19,7 +19,3 @@ class Alien(pygame.sprite.Sprite):
             if alien.rect.x < 0:
                 self.speed *= -1
         self.rect.x += self.speed
-
-    def level_up(self):
-        self.speed += 1
-
