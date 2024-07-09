@@ -8,8 +8,8 @@ from ship import Ship
 # ship_bg = (154, 222, 123)
 ship_bg = (154, 222, 123)
 bullet_bg = (154, 222, 123)
-# bullet_alien_bg = (199, 128, 250)
-bullet_alien_bg = (253, 253, 189)
+bullet_alien_bg = (199, 128, 250)
+# bullet_alien_bg = (253, 253, 189)
 # fps
 fps = 60
 
@@ -21,8 +21,6 @@ screen_width = 800
 screen_height = 600
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Space Invaders")
-
-
 
 # Variables
 shot = False # Controla si el arma está disparada
@@ -56,59 +54,58 @@ ship_list.append(ship)
 ship_list.append(ship2)
 ship_list.append(ship3)
 
+# posiciones alienígenas
+def create_positions(row, col):
+    aliens_list = []
+    new_y = y
+    for i in range(row):
+        new_x = x
+        for j in range(col):
+            aliens_list.append((new_x, new_y))
+            new_x += 50
+        new_y += 50
+    return aliens_list
 
-crab = Alien(x, y, img_crab, screen)
-pos_crabs = crab.create_aliens(1, 11)
-
-octopus = Alien(x, y+50, img_octopus, screen)
-pos_octopus = octopus.create_aliens(2, 11)
-
-squid = Alien(x, y+150, img_squid, screen)
-pos_squid = squid.create_aliens(2, 11)
-# all_aliens = []
 all_aliens = pygame.sprite.Group()
-# Dibuja los aliens
-# all_crabs = []
-for i in pos_crabs:
-    # crab = Alien(i[0], i[1], img_crab, screen)
-    crab = Alien(i[0], i[1], img_crab, screen)
-    # all_crabs.append(crab)
-    all_aliens.add(crab)
+def create_aliens():
+    alien_positions = create_positions(5, 11)
+    for i in alien_positions:
+        if i[1] == x:
+            crab = Alien(i[0], i[1], img_crab)
+            all_aliens.add(crab)
+        if i[1] == x+50 or i[1] == x+100:
+            octopus = Alien(i[0], i[1], img_octopus)
+            all_aliens.add(octopus)
+        if i[1] == x+150 or i[1] == x+200:
+            squid = Alien(i[0], i[1], img_squid)
+            all_aliens.add(squid)
 
-# all_octopus = []
-for i in pos_octopus:
-    octopus = Alien(i[0], i[1], img_octopus, screen)
-    # all_octopus.append(octopus)
-    all_aliens.add(octopus)
+create_aliens()
 
-# all_squid = []
-for i in pos_squid:
-    squid = Alien(i[0], i[1], img_squid, screen)
-    # all_squid.append(squid)
-    all_aliens.add(squid)
-
-
-
+text = pygame.font.Font(None, 30)
+game_over_text = text.render("GAME OVER", 0, (245, 238, 230))
 while run:
     clock.tick(fps)
     screen.fill((0, 0, 0))  # Refresca la ventana y pinta de negro
 
-    pygame.draw.line(screen, (199, 128, 250), (0, 50), (screen_width, 50))
+    pygame.draw.line(screen, (249, 245, 246), (0, 50), (screen_width, 50))
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
 
     # Dibuja las naves
-    ship.create_ship()
-    ship2.create_ship()
-    ship3.create_ship()
+    for new_ship in ship_list:
+        new_ship.create_ship()
 
     # Dibuja los aliens
     all_aliens.draw(screen)
 
     # Mueve los aliens
     all_aliens.update(all_aliens)
+
+    # Sube de fase si no hay más aliens
+
 
     # Disparos de los aliens
     if (shot_alien == False and
@@ -152,14 +149,24 @@ while run:
             # bullets.remove(b)
 
     # Colisión
-    if pygame.sprite.spritecollide(ship, alien_bullets_list, dokill=False):
-        print("Colisión contra nave")
+    # if pygame.sprite.spritecollide(ship, alien_bullets_list, dokill=False):
+    #     print("Colisión contra nave")
 
+    for bul in alien_bullets_list:
+        if ship.rect.colliderect(bul.rect):
+            bul.kill()
+            if len(ship_list) > 0:
+                ship_list.pop(len(ship_list)-1)
+            if len(ship_list) == 0:
+                print("GAME OVER")
+                screen.blit(game_over_text, (500, 500))
 
     for bullet in bullets:
         collision_alien = pygame.sprite.spritecollide(bullet, all_aliens, True)
         if collision_alien != []:
             bullet.kill()
+        if len(all_aliens) == 0:
+            create_aliens()
 
 
     # Actualiza el lienzo para mostrar los cambios

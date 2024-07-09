@@ -16,4 +16,3 @@ class Bullet(pygame.sprite.Sprite):
 
     def move_bullet_alien(self):
         self.rect.y += self.speed
-        # self.rect.move_ip(0, -1 * self.speed)
