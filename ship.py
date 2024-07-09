@@ -15,7 +15,6 @@ class Ship:
         if self.rect.x < 760:
             self.rect.x += 5
 
-
     def move_left(self):
         if self.rect.x > 0:
             self.rect.x -= 5

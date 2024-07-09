@@ -12,9 +12,3 @@ class Score:
 
     def new_level(self):
         self.level += 1
-
-    def gameover(self):
-        pass
-
-
-
