@@ -7,16 +7,11 @@ from score import Score
 from ship import Ship
 
 # Colours
-# ship_bg = (154, 222, 123)
 ship_bg = (154, 222, 123)
 bullet_bg = (154, 222, 123)
 bullet_alien_bg = (199, 128, 250)
-# text_color = (180, 180, 184)
 text_color = (127, 132, 135)
-# game_over_color = (227, 225, 217)
 game_over_color = (125, 124, 124)
-# bullet_alien_bg = (253, 253, 189)
-# fps
 fps = 60
 
 # Inicializa la ventana
@@ -182,8 +177,10 @@ while run:
             bul.kill()
             explotion = Explotion(ship.rect.centerx, ship.rect.centery)
             explotion_img.add(explotion)
+
             if len(ship_list) > 0:
                 ship_list.pop(len(ship_list) - 1)
+
 
     # Colisiones a los alien
     for bullet in bullets:
@@ -191,8 +188,13 @@ while run:
         if collision_alien != []:
             score.new_score()
             bullet.kill()
-            explotion = Explotion(bullet.rect.centerx, bullet.rect.centery)
-            explotion_img.add(explotion)
+            for alien in collision_alien:
+                print("alien ", alien.rect.centerx, alien.rect.centery)
+                print("score ", score.score)
+                explotion = Explotion(alien.rect.centerx, alien.rect.centery)
+                explotion_img.add(explotion)
+            # explotion = Explotion(bullet.rect.centerx, bullet.rect.centery)
+            # explotion_img.add(explotion)
         if len(all_aliens) == 0:
             score.new_level()
             speed += 1
@@ -207,6 +209,8 @@ while run:
     pygame.display.flip()
 
     if len(ship_list) == 0:
+        explotion = Explotion(ship.rect.centerx, ship.rect.centery)
+        explotion_img.add(explotion)
         score.highest_score()
         screen.fill((240, 235, 227))
         screen.blit(bg, (0, 0))
