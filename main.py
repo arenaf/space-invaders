@@ -2,6 +2,7 @@ import random
 import pygame
 from alien import Alien
 from bullet import Bullet
+from explotion import Explotion
 from score import Score
 from ship import Ship
 
@@ -73,7 +74,7 @@ def create_positions(row, col):
 
 
 all_aliens = pygame.sprite.Group()
-
+explotion_img = pygame.sprite.Group()
 
 def create_aliens(speed):
     alien_positions = create_positions(5, 11)
@@ -105,7 +106,7 @@ def create_ship_list():
 ship_list = create_ship_list()
 
 # Textos
-text = pygame.font.Font(None, 40)
+font_score = pygame.font.Font(None, 40)
 font_high_score = pygame.font.Font(None, 20)
 font_game_over = pygame.font.Font(None, 100)
 game_over_text = font_game_over.render("GAME OVER", True, game_over_color)
@@ -115,9 +116,9 @@ while run:
     if len(ship_list) > 0:
         screen.fill((0, 0, 0))  # Refresca la ventana y pinta de negro
         pygame.draw.line(screen, text_color, (0, 50), (screen_width, 50))
-        score_text = text.render(f"Score: {score.score}", 0, text_color)
+        score_text = font_score.render(f"Score: {score.score}", 0, text_color)
         screen.blit(score_text, (270, 10))
-        level_text = text.render(f"Level: {score.level}", 0, text_color)
+        level_text = font_score.render(f"Level: {score.level}", 0, text_color)
         screen.blit(level_text, (420, 10))
         high_score_text = font_high_score.render(f"Highest Score: {score.high_score}", 0, text_color)
         screen.blit(high_score_text, (650, 20))
@@ -128,9 +129,11 @@ while run:
 
         # Dibuja los aliens
         all_aliens.draw(screen)
+        explotion_img.draw(screen)
 
         # Mueve los aliens
         all_aliens.update(all_aliens)
+        explotion_img.update()
 
         # Disparos de los aliens
         if (shot_alien == False and
@@ -177,6 +180,8 @@ while run:
     for bul in alien_bullets_list:
         if ship.rect.colliderect(bul.rect):
             bul.kill()
+            explotion = Explotion(ship.rect.centerx, ship.rect.centery)
+            explotion_img.add(explotion)
             if len(ship_list) > 0:
                 ship_list.pop(len(ship_list) - 1)
 
@@ -186,6 +191,8 @@ while run:
         if collision_alien != []:
             score.new_score()
             bullet.kill()
+            explotion = Explotion(bullet.rect.centerx, bullet.rect.centery)
+            explotion_img.add(explotion)
         if len(all_aliens) == 0:
             score.new_level()
             speed += 1
@@ -219,6 +226,7 @@ while run:
                 score.score = 0
                 all_aliens.empty()
                 all_aliens = pygame.sprite.Group()
+                explotion_img = pygame.sprite.Group()
                 create_aliens(speed)
                 ship_list = create_ship_list()
 
