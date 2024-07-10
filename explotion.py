@@ -1,4 +1,5 @@
 import pygame
+import constants
 
 
 class Explotion(pygame.sprite.Sprite):
@@ -15,7 +16,7 @@ class Explotion(pygame.sprite.Sprite):
         self.cont = 0
 
     def update(self):
-        speed = 3
+        speed = constants.SPEED_EXPLOTION
         self.cont += 1
 
         if self.index < len(self.images) - 1 and self.cont >= speed:
@@ -25,4 +26,3 @@ class Explotion(pygame.sprite.Sprite):
 
         if self.index >= len(self.images) - 1 and self.cont >= speed:
             self.kill()
-

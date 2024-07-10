@@ -1,4 +1,5 @@
 import pygame
+import constants
 
 
 class Alien(pygame.sprite.Sprite):
@@ -9,13 +10,12 @@ class Alien(pygame.sprite.Sprite):
         self.x = x
         self.y = y
         self.rect.center = (self.x, self.y)
-        # self.screen = screen
         self.speed = speed
 
     def update(self, aliens):
         for alien in aliens:
-            if alien.rect.x > 760:
+            if alien.rect.x > constants.MAX_SCREEN_POSITION:
                 self.speed *= -1
-            if alien.rect.x < 0:
+            if alien.rect.x < constants.MIN_SCREEN_POSITION:
                 self.speed *= -1
         self.rect.x += self.speed

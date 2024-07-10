@@ -1,4 +1,4 @@
-
+import constants
 
 
 class Score:
@@ -14,10 +14,9 @@ class Score:
                 self.high_score = 0
 
     def new_score(self):
-        self.score += 3
+        self.score += constants.SCORE_INCREASE
         if self.score > self.high_score:
             self.high_score = self.score
-        # return self.score
 
     def new_level(self):
         self.level += 1

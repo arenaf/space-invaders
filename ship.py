@@ -1,4 +1,4 @@
-import pygame
+import constants
 
 
 class Ship:
@@ -12,9 +12,9 @@ class Ship:
         self.screen.blit(self.image, self.rect)
 
     def move_right(self):
-        if self.rect.x < 760:
-            self.rect.x += 5
+        if self.rect.x < constants.MAX_SCREEN_POSITION:
+            self.rect.x += constants.SHIP_MOVEMENT
 
     def move_left(self):
-        if self.rect.x > 0:
-            self.rect.x -= 5
+        if self.rect.x > constants.MIN_SCREEN_POSITION:
+            self.rect.x -= constants.SHIP_MOVEMENT

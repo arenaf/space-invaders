@@ -1,4 +1,5 @@
 import pygame
+import constants
 
 
 class Bullet(pygame.sprite.Sprite):
@@ -6,9 +7,9 @@ class Bullet(pygame.sprite.Sprite):
         super().__init__()
         self.coord_x = x
         self.coord_y = y
-        self.shot_width = 3
-        self.shot_height = 8
-        self.speed = 4
+        self.shot_width = constants.BULLET_WIDTH
+        self.shot_height = constants.BULLET_HEIGHT
+        self.speed = constants.BULLET_SPEED
         self.rect = pygame.Rect((self.coord_x, self.coord_y, self.shot_width, self.shot_height))
 
     def move_bullet(self):
