@@ -2,7 +2,7 @@ import random
 import pygame
 from alien import Alien
 from bullet import Bullet
-from explotion import Explotion
+from explosion import Explosion
 from score import Score
 from ship import Ship
 import constants
@@ -12,19 +12,22 @@ pygame.init()
 screen = pygame.display.set_mode((constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
 pygame.display.set_caption("Space Invaders")
 
+# Temporizador
+clock = pygame.time.Clock()
+
 # Variables
 shot = False  # Controla si el arma está disparada
 last_shot = 0
 shot_alien = False
 last_shot_alien = 0
-run = True
+final_explosion = 0
 y = 100
 x = 100
-ship_list = []
 speed = constants.SPEED_INCREASE
-
-# Temporizador
-clock = pygame.time.Clock()
+count = 3
+last_count = pygame.time.get_ticks()
+run = True
+show_init_screen = True
 
 # Grupos de sprites
 bullets = pygame.sprite.Group()
@@ -37,6 +40,7 @@ img_ship = pygame.image.load("assets/img/ship.png")
 img_crab = pygame.image.load("assets/img/crab.png")
 img_octopus = pygame.image.load("assets/img/octopus.png")
 img_squid = pygame.image.load("assets/img/squid.png")
+start_img = pygame.image.load("assets/img/start.png")
 restart_img = pygame.image.load("assets/img/restart.png")
 exit_img = pygame.image.load("assets/img/exit.png")
 bg = pygame.image.load("assets/img/bg.png")
@@ -48,9 +52,15 @@ ship3 = Ship(80, 75, img_ship, screen)
 
 score = Score()
 
+def init_screen():
+    screen.blit(bg, (0, 0))
+    # Botón start
+    start_button.center = (constants.SCREEN_WIDTH // 2, constants.SCREEN_HEIGHT // 2)
+    screen.blit(start_img, start_button)
+    pygame.display.update()
 
 # Crea las posiciones alienígenas
-def create_positions(row, col):
+def create_alien_positions(row, col):
     aliens_list = []
     new_y = y
     for i in range(row):
@@ -64,7 +74,7 @@ def create_positions(row, col):
 
 # Crea los aliens
 def create_aliens(speed):
-    alien_positions = create_positions(5, 11)
+    alien_positions = create_alien_positions(5, 11)
     for i in alien_positions:
         if i[1] == x:
             crab = Alien(i[0], i[1], img_crab, speed)
@@ -77,9 +87,6 @@ def create_aliens(speed):
             all_aliens.add(squid)
 
 
-create_aliens(speed)
-
-
 # Crea una lista con 3 naves que serán las vidas del jugador
 def create_ship_list():
     list_all_ships = []
@@ -89,138 +96,178 @@ def create_ship_list():
     return list_all_ships
 
 
-ship_list = create_ship_list()
-
 # Textos
+def create_texts():
+    score_text = font_score.render(f"Score: {score.score}", 0, constants.TEXT_COLOR)
+    screen.blit(score_text, constants.SCORE_TEXT_POSITION)
+    level_text = font_score.render(f"Level: {score.level}", 0, constants.TEXT_COLOR)
+    screen.blit(level_text, constants.LEVEL_TEXT_POSITION)
+    high_score_text = font_high_score.render(f"Highest Score: {score.high_score}", 0, constants.TEXT_COLOR)
+    screen.blit(high_score_text, constants.HIGH_SCORE_TEXT_POSITION)
+
+# Fuentes y tamaño de los textos
 font_score = pygame.font.Font(None, constants.FONT_SCORE_SIZE)
 font_high_score = pygame.font.Font(None, constants.FONT_HIGH_SCORE_SIZE)
 font_game_over = pygame.font.Font(None, constants.FONT_GAME_OVER_SIZE)
 game_over_text = font_game_over.render("GAME OVER", True, constants.GAME_OVER_COLOR)
 
+
+create_aliens(speed)
+ship_list = create_ship_list()
+start_button = start_img.get_rect()
+
 while run:
-    clock.tick(constants.FPS)
-    if len(ship_list) > 0:
-        screen.fill(constants.INIT_SCREEN_BG)  # Refresca la ventana y pinta de negro
-        pygame.draw.line(screen, constants.TEXT_COLOR, (0, 50), (constants.SCREEN_WIDTH, 50))
-        score_text = font_score.render(f"Score: {score.score}", 0, constants.TEXT_COLOR)
-        screen.blit(score_text, constants.SCORE_TEXT_POSITION)
-        level_text = font_score.render(f"Level: {score.level}", 0, constants.TEXT_COLOR)
-        screen.blit(level_text, constants.LEVEL_TEXT_POSITION)
-        high_score_text = font_high_score.render(f"Highest Score: {score.high_score}", 0, constants.TEXT_COLOR)
-        screen.blit(high_score_text, constants.HIGH_SCORE_TEXT_POSITION)
 
-        # Dibuja las naves
-        for new_ship in ship_list:
-            new_ship.create_ship()
-
-        # Dibuja los aliens
-        all_aliens.draw(screen)
-        explotion_img.draw(screen)
-
-        # Mueve los aliens
-        all_aliens.update(all_aliens)
-        explotion_img.update()
-
-        # Disparos de los aliens
-        if (shot_alien == False and
-                (pygame.time.get_ticks() - last_shot_alien > constants.GUN_COOLDOWN) and
-                (len(alien_bullets_list) < 3)):
-            bullet_alien = random.choice(all_aliens.sprites())
-            b_allien = Bullet(bullet_alien.rect.x, bullet_alien.rect.y)
-            shot_alien = True
-            last_shot_alien = pygame.time.get_ticks()
-            alien_bullets_list.add(b_allien)
-
-        if len(alien_bullets_list) < 3:
-            shot_alien = False
-        for ba in alien_bullets_list:
-            pygame.draw.rect(screen, constants.BULLET_ALIEN_BG, ba)
-            ba.move_bullet_alien()
-            if ba.rect.y > constants.SCREEN_HEIGHT:
-                ba.kill()
-
-    # Manejo de teclas
-    key = pygame.key.get_pressed()
-    if key[pygame.K_RIGHT]:
-        ship.move_right()
-    if key[pygame.K_LEFT]:
-        ship.move_left()
-
-    # Disparos de la nave
-    if key[pygame.K_SPACE] and shot == False and (pygame.time.get_ticks() - last_shot > constants.GUN_COOLDOWN):
-        b = Bullet(ship.rect.x + ship.rect.width // 2, ship.rect.y)
-        shot = True
-        last_shot = pygame.time.get_ticks()
-        bullets.add(b)
-    if key[pygame.K_SPACE] == False:  # Si no está presionada la barra espaciadora, puede lanzar otro disparo
-        shot = False
-    for b in bullets:
-        pygame.draw.rect(screen, constants.BULLET_BG, b)
-        b.move_bullet()
-        if b.rect.y < 0:
-            b.kill()
-
-    # Colisiones
-
-    # Colisión con la nave
-    for bul in alien_bullets_list:
-        if ship.rect.colliderect(bul.rect):
-            bul.kill()
-            explotion = Explotion(ship.rect.centerx, ship.rect.centery)
-            explotion_img.add(explotion)
-
-            if len(ship_list) > 0:
-                ship_list.pop(len(ship_list) - 1)
-
-
-    # Colisión con los aliens
-    for bullet in bullets:
-        collision_alien = pygame.sprite.spritecollide(bullet, all_aliens, True)
-        if collision_alien != []:
-            score.new_score()
-            bullet.kill()
-            for alien in collision_alien:
-                explotion = Explotion(alien.rect.centerx, alien.rect.centery)
-                explotion_img.add(explotion)
-        if len(all_aliens) == 0:
-            score.new_level()
-            speed += constants.SPEED_INCREASE
-            create_aliens(speed)
-
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            run = False
-
-    # Actualiza el lienzo para mostrar los cambios
-    pygame.display.flip()
-
-    if len(ship_list) == 0:
-        explotion = Explotion(ship.rect.centerx, ship.rect.centery)
-        explotion_img.add(explotion)
-        score.highest_score()
-        screen.fill(constants.FINAL_SCREEN_BG)
-        screen.blit(bg, (0, 0))
-        text_rect = game_over_text.get_rect(center=(constants.SCREEN_WIDTH // 2, constants.SCREEN_HEIGHT // 2 - 50))
-        screen.blit(game_over_text, text_rect)
-        # Botón reinicio
-        restart_button = restart_img.get_rect()
-        restart_button.center = (constants.SCREEN_WIDTH // 2 - 100, constants.SCREEN_HEIGHT // 2 + 50)
-        screen.blit(restart_img, restart_button)
-        # Botón exit
-        exit_button = exit_img.get_rect()
-        exit_button.center = (constants.SCREEN_WIDTH // 2 + 100, constants.SCREEN_HEIGHT // 2 + 50)
-        screen.blit(exit_img, exit_button)
-
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if restart_button.collidepoint(event.pos):
-                score.score = 0
-                all_aliens.empty()
-                all_aliens = pygame.sprite.Group()
-                explotion_img = pygame.sprite.Group()
-                create_aliens(speed)
-                ship_list = create_ship_list()
-
-            if exit_button.collidepoint(event.pos):
+    if show_init_screen:
+        init_screen()
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if start_button.collidepoint(event.pos):
+                    show_init_screen = False
+            if event.type == pygame.QUIT:
                 run = False
+
+    if show_init_screen == False:
+        clock.tick(constants.FPS)
+        if len(ship_list) > 0:
+            screen.fill(constants.INIT_SCREEN_BG)  # Refresca la ventana y pinta de negro
+            pygame.draw.line(screen, constants.TEXT_COLOR, (0, 50), (constants.SCREEN_WIDTH, 50))
+            # score_text = font_score.render(f"Score: {score.score}", 0, constants.TEXT_COLOR)
+            # screen.blit(score_text, constants.SCORE_TEXT_POSITION)
+            # level_text = font_score.render(f"Level: {score.level}", 0, constants.TEXT_COLOR)
+            # screen.blit(level_text, constants.LEVEL_TEXT_POSITION)
+            # high_score_text = font_high_score.render(f"Highest Score: {score.high_score}", 0, constants.TEXT_COLOR)
+            # screen.blit(high_score_text, constants.HIGH_SCORE_TEXT_POSITION)
+            create_texts()
+            # Funciones draw
+            for new_ship in ship_list:
+                new_ship.create_ship()
+
+            all_aliens.draw(screen)
+            explotion_img.draw(screen)
+
+            # Funciones update
+            all_aliens.update(all_aliens)
+            explotion_img.update()
+
+            # Disparos de los aliens
+            if (shot_alien == False and
+                    (pygame.time.get_ticks() - last_shot_alien > constants.GUN_COOLDOWN) and
+                    (len(alien_bullets_list) < 3)):
+                bullet_alien = random.choice(all_aliens.sprites())
+                b_allien = Bullet(bullet_alien.rect.x, bullet_alien.rect.y)
+                last_shot_alien = pygame.time.get_ticks()
+                alien_bullets_list.add(b_allien)
+                shot_alien = True
+
+            if len(alien_bullets_list) < 3:
+                shot_alien = False
+
+            for ba in alien_bullets_list:
+                pygame.draw.rect(screen, constants.BULLET_ALIEN_BG, ba)
+                ba.move_bullet_alien()
+                if ba.rect.y > constants.SCREEN_HEIGHT:
+                    ba.kill()
+
+        # Manejo de teclas
+        key = pygame.key.get_pressed()
+        if key[pygame.K_RIGHT]:
+            ship.move_right()
+        if key[pygame.K_LEFT]:
+            ship.move_left()
+
+        # Disparos de la nave
+        if key[pygame.K_SPACE] and shot == False and (pygame.time.get_ticks() - last_shot > constants.GUN_COOLDOWN):
+            b = Bullet(ship.rect.x + ship.rect.width // 2, ship.rect.y)
+            last_shot = pygame.time.get_ticks()
+            bullets.add(b)
+            shot = True
+
+        if key[pygame.K_SPACE] == False:  # Si no está presionada la barra espaciadora, puede lanzar otro disparo
+            shot = False
+
+        for b in bullets:
+            pygame.draw.rect(screen, constants.BULLET_BG, b)
+            b.move_bullet()
+            if b.rect.y < 0:
+                b.kill()
+
+        # Colisiones
+        # Colisión con la nave
+        for bul in alien_bullets_list:
+            if ship.rect.colliderect(bul.rect):
+                explotion = Explosion(ship.rect.centerx, ship.rect.centery)
+                explotion_img.add(explotion)
+                bul.kill()
+                # if len(ship_list) == 1:
+                #     if count > 0:
+                #         print(len(ship_list))
+                #         time = pygame.time.get_ticks()
+                #         explotion = Explosion(ship.rect.centerx, ship.rect.centery)
+                #         explotion_img.add(explotion)
+                #         if time - last_count > 1000:
+                #             count -= 1
+                #             last_count = time
+
+                if len(ship_list) > 0:
+                    ship_list.pop(len(ship_list) - 1)
+
+        # Colisión con los aliens
+        for bullet in bullets:
+            collision_alien = pygame.sprite.spritecollide(bullet, all_aliens, True)
+            if collision_alien != []:
+                score.new_score()
+                for alien in collision_alien:
+                    explotion = Explosion(alien.rect.centerx, alien.rect.centery)
+                    explotion_img.add(explotion)
+                bullet.kill()
+
+            if len(all_aliens) == 0:
+                score.new_level()
+                speed += constants.SPEED_INCREASE
+                create_aliens(speed)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+
+        # Actualiza el lienzo para mostrar los cambios
+        pygame.display.flip()
+
+        # Pantalla final
+        if len(ship_list) == 0:
+            bullets.empty()
+            alien_bullets_list.empty()
+            score.highest_score()
+            screen.blit(bg, (0, 0))
+            create_texts()
+            # score_text = font_score.render(f"Score: {score.score}", 0, constants.TEXT_COLOR)
+            # screen.blit(score_text, constants.SCORE_TEXT_POSITION)
+            # level_text = font_score.render(f"Level: {score.level}", 0, constants.TEXT_COLOR)
+            # screen.blit(level_text, constants.LEVEL_TEXT_POSITION)
+            text_rect = game_over_text.get_rect(center=(constants.SCREEN_WIDTH // 2, constants.SCREEN_HEIGHT // 2 - 50))
+            screen.blit(game_over_text, text_rect)
+            # Botón reinicio
+            restart_button = restart_img.get_rect()
+            restart_button.center = (constants.SCREEN_WIDTH // 2 - 100, constants.SCREEN_HEIGHT // 2 + 50)
+            screen.blit(restart_img, restart_button)
+            # Botón exit
+            exit_button = exit_img.get_rect()
+            exit_button.center = (constants.SCREEN_WIDTH // 2 + 100, constants.SCREEN_HEIGHT // 2 + 50)
+            screen.blit(exit_img, exit_button)
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if restart_button.collidepoint(event.pos):
+                    score.score = 0
+                    all_aliens.empty()
+                    all_aliens = pygame.sprite.Group()
+                    explotion_img.empty()
+                    explotion_img = pygame.sprite.Group()
+                    create_aliens(speed)
+                    ship_list = create_ship_list()
+
+                if exit_button.collidepoint(event.pos):
+                    run = False
+
 
 pygame.quit()

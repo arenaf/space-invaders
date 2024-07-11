@@ -5,7 +5,7 @@ class Ship:
     def __init__(self, x, y, image, screen):
         self.image = image
         self.rect = self.image.get_rect()
-        self.rect.center = (x, y - self.rect.width)
+        self.rect.center = (x, y - self.rect.height)
         self.screen = screen
 
     def create_ship(self):

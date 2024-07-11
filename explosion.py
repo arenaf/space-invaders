@@ -2,7 +2,7 @@ import pygame
 import constants
 
 
-class Explotion(pygame.sprite.Sprite):
+class Explosion(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
         self.images = []
