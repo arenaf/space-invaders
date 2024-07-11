@@ -7,35 +7,30 @@ from score import Score
 from ship import Ship
 import constants
 
-# Inicializa la ventana
+# -------- Inicializa la ventana ---------
 pygame.init()
 screen = pygame.display.set_mode((constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
 pygame.display.set_caption("Space Invaders")
 
-# Temporizador
-clock = pygame.time.Clock()
-
-# Variables
+# --------- Variables --------
 shot = False  # Controla si el arma está disparada
 last_shot = 0
 shot_alien = False
 last_shot_alien = 0
-final_explosion = 0
 y = 100
 x = 100
 speed = constants.SPEED_INCREASE
-count = 3
-last_count = pygame.time.get_ticks()
 run = True
 show_init_screen = True
+clock = pygame.time.Clock() # Temporizador
 
-# Grupos de sprites
+# --------- Grupos de sprites --------
 bullets = pygame.sprite.Group()
 alien_bullets_list = pygame.sprite.Group()
 all_aliens = pygame.sprite.Group()
-explotion_img = pygame.sprite.Group()
+explosion_img = pygame.sprite.Group()
 
-# Imágenes
+# --------- Imágenes --------
 img_ship = pygame.image.load("assets/img/ship.png")
 img_crab = pygame.image.load("assets/img/crab.png")
 img_octopus = pygame.image.load("assets/img/octopus.png")
@@ -44,23 +39,41 @@ start_img = pygame.image.load("assets/img/start.png")
 restart_img = pygame.image.load("assets/img/restart.png")
 exit_img = pygame.image.load("assets/img/exit.png")
 bg = pygame.image.load("assets/img/bg.png")
+instructions = pygame.image.load("assets/img/instructions.png")
 
-# Crea los objetos
+# ---------- Textos ----------
+font_score = pygame.font.Font(None, constants.FONT_SCORE_SIZE)
+font_high_score = pygame.font.Font(None, constants.FONT_HIGH_SCORE_SIZE)
+font_game_over = pygame.font.Font(None, constants.FONT_GAME_OVER_SIZE)
+game_over_text = font_game_over.render("GAME OVER", True, constants.GAME_OVER_COLOR)
+
+# ---------- Crea los objetos --------
 ship = Ship(constants.SCREEN_WIDTH // 2, constants.SCREEN_HEIGHT, img_ship, screen)
 ship2 = Ship(30, 75, img_ship, screen)
 ship3 = Ship(80, 75, img_ship, screen)
 
 score = Score()
 
+
 def init_screen():
+    """
+    Pantalla de inicio
+    """
     screen.blit(bg, (0, 0))
     # Botón start
     start_button.center = (constants.SCREEN_WIDTH // 2, constants.SCREEN_HEIGHT // 2)
     screen.blit(start_img, start_button)
+    screen.blit(instructions, (550, 320))
     pygame.display.update()
 
-# Crea las posiciones alienígenas
+
 def create_alien_positions(row, col):
+    """
+    Crea las posiciones alienígenas
+    :param row: filas de aliens
+    :param col: columnas de aliens
+    :return: lista con todas las posiciones de los aliens
+    """
     aliens_list = []
     new_y = y
     for i in range(row):
@@ -72,8 +85,11 @@ def create_alien_positions(row, col):
     return aliens_list
 
 
-# Crea los aliens
 def create_aliens(speed):
+    """
+    Crea los objetos de los diferentes aliens y los añade a un grupo de sprites (all_aliens)
+    :param speed: velocidad que se incrementa según aumentan las fases
+    """
     alien_positions = create_alien_positions(5, 11)
     for i in alien_positions:
         if i[1] == x:
@@ -87,17 +103,19 @@ def create_aliens(speed):
             all_aliens.add(squid)
 
 
-# Crea una lista con 3 naves que serán las vidas del jugador
 def create_ship_list():
-    list_all_ships = []
-    list_all_ships.append(ship)
-    list_all_ships.append(ship2)
-    list_all_ships.append(ship3)
+    """
+    Crea una lista con 3 naves que serán las vidas del jugador
+    :return: lista creada
+    """
+    list_all_ships = [ship, ship2, ship3]
     return list_all_ships
 
 
-# Textos
 def create_texts():
+    """
+    Crea una línea y los textos: Score, Level y Highest Score
+    """
     pygame.draw.line(screen, constants.TEXT_COLOR, (0, 50), (constants.SCREEN_WIDTH, 50))
     score_text = font_score.render(f"Score: {score.score}", 0, constants.TEXT_COLOR)
     screen.blit(score_text, constants.SCORE_TEXT_POSITION)
@@ -105,12 +123,6 @@ def create_texts():
     screen.blit(level_text, constants.LEVEL_TEXT_POSITION)
     high_score_text = font_high_score.render(f"Highest Score: {score.high_score}", 0, constants.TEXT_COLOR)
     screen.blit(high_score_text, constants.HIGH_SCORE_TEXT_POSITION)
-
-# Fuentes y tamaño de los textos
-font_score = pygame.font.Font(None, constants.FONT_SCORE_SIZE)
-font_high_score = pygame.font.Font(None, constants.FONT_HIGH_SCORE_SIZE)
-font_game_over = pygame.font.Font(None, constants.FONT_GAME_OVER_SIZE)
-game_over_text = font_game_over.render("GAME OVER", True, constants.GAME_OVER_COLOR)
 
 
 create_aliens(speed)
@@ -131,19 +143,20 @@ while run:
     if show_init_screen == False:
         clock.tick(constants.FPS)
         if len(ship_list) > 0:
-            # screen.blit(bg, (0, 0))
-            screen.fill(constants.INIT_SCREEN_BG)  # Refresca la ventana y pinta de negro
+            screen.blit(bg, (0, 0)) # Refresca la ventana
             create_texts()
-            # Funciones draw
+
+            # Crea las vidas de la nave
             for new_ship in ship_list:
                 new_ship.create_ship()
 
+        # Funciones draw
         all_aliens.draw(screen)
-        explotion_img.draw(screen)
+        explosion_img.draw(screen)
 
         # Funciones update
         all_aliens.update(all_aliens)
-        explotion_img.update()
+        explosion_img.update()
 
         # Disparos de los aliens
         if (shot_alien == False and
@@ -187,12 +200,12 @@ while run:
             if b.rect.y < 0:
                 b.kill()
 
-        # Colisiones
+        # --------- Colisiones ---------
         # Colisión con la nave
         for bul in alien_bullets_list:
             if ship.rect.colliderect(bul.rect):
-                explotion = Explosion(ship.rect.centerx, ship.rect.centery)
-                explotion_img.add(explotion)
+                explosion = Explosion(ship.rect.centerx, ship.rect.centery)
+                explosion_img.add(explosion)
                 bul.kill()
 
                 if len(ship_list) > 0:
@@ -204,8 +217,8 @@ while run:
             if collision_alien != []:
                 score.new_score()
                 for alien in collision_alien:
-                    explotion = Explosion(alien.rect.centerx, alien.rect.centery)
-                    explotion_img.add(explotion)
+                    explosion = Explosion(alien.rect.centerx, alien.rect.centery)
+                    explosion_img.add(explosion)
                 bullet.kill()
 
             if len(all_aliens) == 0:
@@ -213,6 +226,7 @@ while run:
                 speed += constants.SPEED_INCREASE
                 create_aliens(speed)
 
+        # Sale del programa al cerrar la ventana principal
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
@@ -226,18 +240,16 @@ while run:
             alien_bullets_list.empty()
             score.highest_score()
             screen.blit(bg, (0, 0))
-            create_texts()
 
+            create_texts()
             text_rect = game_over_text.get_rect(center=(constants.SCREEN_WIDTH // 2, constants.SCREEN_HEIGHT // 2))
             screen.blit(game_over_text, text_rect)
-            # Botón reinicio
+
             restart_button = restart_img.get_rect()
-            # restart_button.center = (constants.SCREEN_WIDTH // 2 - 100, constants.SCREEN_HEIGHT // 2 + 50)
             restart_button.center = (constants.SCREEN_WIDTH // 2 - 100, constants.SCREEN_HEIGHT // 2 + 100)
             screen.blit(restart_img, restart_button)
-            # Botón exit
+
             exit_button = exit_img.get_rect()
-            # exit_button.center = (constants.SCREEN_WIDTH // 2 + 100, constants.SCREEN_HEIGHT // 2 + 50)
             exit_button.center = (constants.SCREEN_WIDTH // 2 + 100, constants.SCREEN_HEIGHT // 2 + 100)
             screen.blit(exit_img, exit_button)
 
@@ -246,13 +258,12 @@ while run:
                     score.score = 0
                     all_aliens.empty()
                     all_aliens = pygame.sprite.Group()
-                    explotion_img.empty()
-                    explotion_img = pygame.sprite.Group()
+                    explosion_img.empty()
+                    explosion_img = pygame.sprite.Group()
                     create_aliens(speed)
                     ship_list = create_ship_list()
 
                 if exit_button.collidepoint(event.pos):
                     run = False
-
 
 pygame.quit()

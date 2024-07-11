@@ -40,5 +40,5 @@ BULLET_SPEED = 4
 BULLET_WIDTH = 3
 BULLET_HEIGHT = 8
 
-# -------- Explotion --------
-SPEED_EXPLOTION = 3
+# -------- Explosion --------
+SPEED_EXPLOSION = 3
