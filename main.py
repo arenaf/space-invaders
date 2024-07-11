@@ -98,6 +98,7 @@ def create_ship_list():
 
 # Textos
 def create_texts():
+    pygame.draw.line(screen, constants.TEXT_COLOR, (0, 50), (constants.SCREEN_WIDTH, 50))
     score_text = font_score.render(f"Score: {score.score}", 0, constants.TEXT_COLOR)
     screen.blit(score_text, constants.SCORE_TEXT_POSITION)
     level_text = font_score.render(f"Level: {score.level}", 0, constants.TEXT_COLOR)
@@ -130,44 +131,38 @@ while run:
     if show_init_screen == False:
         clock.tick(constants.FPS)
         if len(ship_list) > 0:
+            # screen.blit(bg, (0, 0))
             screen.fill(constants.INIT_SCREEN_BG)  # Refresca la ventana y pinta de negro
-            pygame.draw.line(screen, constants.TEXT_COLOR, (0, 50), (constants.SCREEN_WIDTH, 50))
-            # score_text = font_score.render(f"Score: {score.score}", 0, constants.TEXT_COLOR)
-            # screen.blit(score_text, constants.SCORE_TEXT_POSITION)
-            # level_text = font_score.render(f"Level: {score.level}", 0, constants.TEXT_COLOR)
-            # screen.blit(level_text, constants.LEVEL_TEXT_POSITION)
-            # high_score_text = font_high_score.render(f"Highest Score: {score.high_score}", 0, constants.TEXT_COLOR)
-            # screen.blit(high_score_text, constants.HIGH_SCORE_TEXT_POSITION)
             create_texts()
             # Funciones draw
             for new_ship in ship_list:
                 new_ship.create_ship()
 
-            all_aliens.draw(screen)
-            explotion_img.draw(screen)
+        all_aliens.draw(screen)
+        explotion_img.draw(screen)
 
-            # Funciones update
-            all_aliens.update(all_aliens)
-            explotion_img.update()
+        # Funciones update
+        all_aliens.update(all_aliens)
+        explotion_img.update()
 
-            # Disparos de los aliens
-            if (shot_alien == False and
-                    (pygame.time.get_ticks() - last_shot_alien > constants.GUN_COOLDOWN) and
-                    (len(alien_bullets_list) < 3)):
-                bullet_alien = random.choice(all_aliens.sprites())
-                b_allien = Bullet(bullet_alien.rect.x, bullet_alien.rect.y)
-                last_shot_alien = pygame.time.get_ticks()
-                alien_bullets_list.add(b_allien)
-                shot_alien = True
+        # Disparos de los aliens
+        if (shot_alien == False and
+                (pygame.time.get_ticks() - last_shot_alien > constants.GUN_COOLDOWN) and
+                (len(alien_bullets_list) < 3)):
+            bullet_alien = random.choice(all_aliens.sprites())
+            b_allien = Bullet(bullet_alien.rect.x, bullet_alien.rect.y)
+            last_shot_alien = pygame.time.get_ticks()
+            alien_bullets_list.add(b_allien)
+            shot_alien = True
 
-            if len(alien_bullets_list) < 3:
-                shot_alien = False
+        if len(alien_bullets_list) < 3:
+            shot_alien = False
 
-            for ba in alien_bullets_list:
-                pygame.draw.rect(screen, constants.BULLET_ALIEN_BG, ba)
-                ba.move_bullet_alien()
-                if ba.rect.y > constants.SCREEN_HEIGHT:
-                    ba.kill()
+        for ba in alien_bullets_list:
+            pygame.draw.rect(screen, constants.BULLET_ALIEN_BG, ba)
+            ba.move_bullet_alien()
+            if ba.rect.y > constants.SCREEN_HEIGHT:
+                ba.kill()
 
         # Manejo de teclas
         key = pygame.key.get_pressed()
@@ -199,15 +194,6 @@ while run:
                 explotion = Explosion(ship.rect.centerx, ship.rect.centery)
                 explotion_img.add(explotion)
                 bul.kill()
-                # if len(ship_list) == 1:
-                #     if count > 0:
-                #         print(len(ship_list))
-                #         time = pygame.time.get_ticks()
-                #         explotion = Explosion(ship.rect.centerx, ship.rect.centery)
-                #         explotion_img.add(explotion)
-                #         if time - last_count > 1000:
-                #             count -= 1
-                #             last_count = time
 
                 if len(ship_list) > 0:
                     ship_list.pop(len(ship_list) - 1)
@@ -241,19 +227,18 @@ while run:
             score.highest_score()
             screen.blit(bg, (0, 0))
             create_texts()
-            # score_text = font_score.render(f"Score: {score.score}", 0, constants.TEXT_COLOR)
-            # screen.blit(score_text, constants.SCORE_TEXT_POSITION)
-            # level_text = font_score.render(f"Level: {score.level}", 0, constants.TEXT_COLOR)
-            # screen.blit(level_text, constants.LEVEL_TEXT_POSITION)
-            text_rect = game_over_text.get_rect(center=(constants.SCREEN_WIDTH // 2, constants.SCREEN_HEIGHT // 2 - 50))
+
+            text_rect = game_over_text.get_rect(center=(constants.SCREEN_WIDTH // 2, constants.SCREEN_HEIGHT // 2))
             screen.blit(game_over_text, text_rect)
             # Botón reinicio
             restart_button = restart_img.get_rect()
-            restart_button.center = (constants.SCREEN_WIDTH // 2 - 100, constants.SCREEN_HEIGHT // 2 + 50)
+            # restart_button.center = (constants.SCREEN_WIDTH // 2 - 100, constants.SCREEN_HEIGHT // 2 + 50)
+            restart_button.center = (constants.SCREEN_WIDTH // 2 - 100, constants.SCREEN_HEIGHT // 2 + 100)
             screen.blit(restart_img, restart_button)
             # Botón exit
             exit_button = exit_img.get_rect()
-            exit_button.center = (constants.SCREEN_WIDTH // 2 + 100, constants.SCREEN_HEIGHT // 2 + 50)
+            # exit_button.center = (constants.SCREEN_WIDTH // 2 + 100, constants.SCREEN_HEIGHT // 2 + 50)
+            exit_button.center = (constants.SCREEN_WIDTH // 2 + 100, constants.SCREEN_HEIGHT // 2 + 100)
             screen.blit(exit_img, exit_button)
 
             if event.type == pygame.MOUSEBUTTONDOWN:
